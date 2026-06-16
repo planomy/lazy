@@ -1,54 +1,35 @@
 # Lazy Laser
 
-A tiny **Windows** tray app that draws a fading red laser trail on top of any app — PowerPoint, Excel, Word, browser, and more. Same feel as the laser in [Prez](https://github.com/planomy/prez).
+A tiny **Windows** tray app — fading red laser trail on top of any app (PowerPoint, Excel, browser, etc.). Same feel as the laser in [Prez](https://github.com/planomy/prez).
 
-![Lazy Laser icon](assets/icon.svg)
+---
 
-## How it works
+## Download and run (for teachers / presenters)
 
-- Transparent **always-on-top overlay** across all monitors
-- **Clicks pass through** — keep using the app underneath
-- Tracks the system cursor when laser mode is on
-- Trail fades out over ~1 second
+**No Node. No git. No terminal.**
 
-## Requirements
-
-- **Windows 10/11**
-- Node.js 20+ (for dev/build only)
-
-## Run locally
-
-```bash
-npm install
-npm start
-```
-
-## Build portable Windows `.exe`
-
-On a Windows PC:
-
-```bash
-npm install
-npm run pack:win
-```
-
-Output: `release/Lazy Laser *.exe` — no installer, runs from the folder.
-
-## Controls
+1. Open **[Releases](https://github.com/planomy/lazy/releases)** on GitHub
+2. Download **`Lazy Laser … .exe`** from the latest release
+3. **Double-click** to run (Windows may ask you to allow it once)
+4. Press **Ctrl+Alt+L** to turn the laser on/off
 
 | Action | Shortcut |
 |--------|----------|
-| Toggle laser on/off | **Ctrl+Alt+L** |
+| Toggle laser | **Ctrl+Alt+L** |
 | Clear trail | **Ctrl+Shift+Backspace** |
-| Toggle laser | Click tray icon |
+| Toggle laser | Click the tray icon |
 | Quit | Tray menu → Quit Lazy |
 
-## Tips
+The app sits in the system tray (near the clock). Leave it running in the background so the hotkey works.
 
-- Allow the app to run in the background so the global hotkey works.
-- Works over most desktop apps and slideshows; some secure fullscreen viewers may block overlays.
-- **iPad:** system-wide overlay is not possible on iPadOS — this is PC only.
+---
 
-## Dev on Mac
+## Developers
 
-You can `npm start` on macOS to smoke-test the tray app, but the overlay is built for **Windows**. Give your mate the `.exe` for the real test.
+```bash
+npm install
+npm start          # smoke test (Mac or Windows)
+npm run pack:win   # build portable .exe locally on Windows
+```
+
+Pushing a version tag (e.g. `v0.1.1`) triggers GitHub Actions to build the `.exe` and attach it to a release automatically.
