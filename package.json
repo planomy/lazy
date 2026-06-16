@@ -1,0 +1,31 @@
+{
+  "name": "lazy",
+  "version": "0.1.0",
+  "description": "System-wide fading laser pointer for Windows presentations",
+  "author": "planomy",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "pack:win": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.planomy.lazy",
+    "productName": "Lazy Laser",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": ["portable"]
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "assets/**/*"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}
