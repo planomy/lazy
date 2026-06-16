@@ -8,10 +8,14 @@ A tiny **Windows** tray app — fading red laser trail on top of any app (PowerP
 
 **No Node. No git. No terminal.**
 
-1. Open **[Releases](https://github.com/planomy/lazy/releases)** on GitHub
+1. Open **[Releases](https://github.com/planomy/lazy/releases/latest)**
 2. Download **`Lazy Laser … .exe`** from the latest release
+   - If the `.exe` does nothing, try the **`.zip`** instead — unzip it, then double-click **`Lazy Laser.exe`** inside
 3. **Double-click** to run (Windows may ask you to allow it once)
-4. Press **Ctrl+Alt+L** to turn the laser on/off
+4. A popup confirms it started — click **OK**
+5. Press **Ctrl+Alt+L** to turn the laser on/off
+
+Look for the **red dot** in the system tray (near the clock). Click the **^** arrow if you do not see it.
 
 | Action | Shortcut |
 |--------|----------|
