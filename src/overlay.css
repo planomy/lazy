@@ -36,7 +36,7 @@ body {
 }
 
 .badge--on {
-  opacity: 0.92;
+  opacity: 0.95;
   color: #fff;
   background: rgba(239, 68, 68, 0.92);
 }

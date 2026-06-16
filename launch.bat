@@ -16,7 +16,7 @@ echo.
 echo Lazy Laser IS running.
 echo   - Press Alt+Tab and look for "Lazy Laser"
 echo   - Or click it on the taskbar
-echo   - Or press Ctrl+Alt+L to turn the laser on
+echo   - Or press F8 to turn the laser on
 echo.
 :end
 pause

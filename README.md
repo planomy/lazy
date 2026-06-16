@@ -19,7 +19,7 @@ If a file **`lazy-started.txt`** appears on the Desktop but there is no window, 
 ## Controls
 
 - **Click the button** in the control window
-- **Ctrl+Alt+L** — toggle laser
+- **F8** — toggle laser
 - **Ctrl+Shift+Backspace** — clear trail
 
 ---

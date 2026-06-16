@@ -13,9 +13,15 @@ const path = require('path')
 const fs = require('fs')
 const os = require('os')
 
-app.disableHardwareAcceleration()
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.planomy.lazy')
+}
 
-const TOGGLE_ACCEL = 'Control+Alt+L'
+app.disableHardwareAcceleration()
+app.commandLine.appendSwitch('disable-gpu-compositing')
+app.commandLine.appendSwitch('disable-direct-composition')
+
+const TOGGLE_ACCEL = 'F8'
 const CLEAR_ACCEL = 'Control+Shift+Backspace'
 const POLL_MS = 16
 
@@ -27,7 +33,7 @@ let pollTimer = null
 let overlayBounds = { x: 0, y: 0, width: 0, height: 0 }
 
 function markStarted() {
-  const text = `Lazy Laser started at ${new Date().toLocaleString()}\nPress Ctrl+Alt+L or look for the Lazy Laser window.\n`
+  const text = `Lazy Laser started at ${new Date().toLocaleString()}\nPress F8 or click the Lazy Laser window button.\n`
   const paths = [
     path.join(path.dirname(process.execPath), 'lazy-started.txt'),
     path.join(os.homedir(), 'Desktop', 'lazy-started.txt'),
@@ -98,15 +104,17 @@ function unionDisplayBounds() {
 }
 
 function createControlWindow() {
+  const appIcon = createTrayIcon()
   controlWindow = new BrowserWindow({
-    width: 260,
-    height: 160,
+    width: 280,
+    height: 200,
     frame: true,
     resizable: false,
     alwaysOnTop: true,
     skipTaskbar: false,
     show: false,
-    title: 'Lazy Laser',
+    title: 'Lazy Laser — click button to start',
+    icon: appIcon,
     backgroundColor: '#1e1e1e',
     webPreferences: {
       preload: path.join(__dirname, 'control-preload.js'),
@@ -193,9 +201,12 @@ function setLaserActive(next) {
   }
   if (controlWindow && !controlWindow.isDestroyed()) {
     controlWindow.webContents.send('laser-state', laserActive)
+    controlWindow.setTitle(
+      laserActive ? 'Lazy Laser — ON (move mouse)' : 'Lazy Laser — OFF',
+    )
   }
   if (tray) {
-    tray.setToolTip(laserActive ? 'Lazy Laser — ON' : 'Lazy Laser — OFF')
+    tray.setToolTip(laserActive ? 'Lazy Laser — ON (F8)' : 'Lazy Laser — OFF (F8)')
   }
 }
 
@@ -236,7 +247,7 @@ function registerShortcuts() {
 function createTray() {
   const icon = createTrayIcon().resize({ width: 16, height: 16 })
   tray = new Tray(icon)
-  tray.setToolTip('Lazy Laser — OFF')
+  tray.setToolTip('Lazy Laser — OFF (F8)')
 
   const menu = Menu.buildFromTemplate([
     { label: 'Show control window', click: () => controlWindow?.show() },

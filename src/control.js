@@ -3,10 +3,10 @@ const quitBtn = document.getElementById('quit')
 
 function setUi(active) {
   if (active) {
-    toggleBtn.textContent = 'Laser ON — click to turn OFF'
+    toggleBtn.textContent = 'Turn laser OFF'
     toggleBtn.classList.add('on')
   } else {
-    toggleBtn.textContent = 'Laser OFF — click to turn ON'
+    toggleBtn.textContent = 'Turn laser ON'
     toggleBtn.classList.remove('on')
   }
 }

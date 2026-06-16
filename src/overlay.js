@@ -105,16 +105,12 @@ function setBadge(active) {
   badge.classList.remove('badge--on', 'badge--off', 'badge--flash')
 
   if (active) {
-    badge.textContent = 'Lazy ON'
+    badge.textContent = 'LASER ON — move mouse'
     badge.classList.add('badge--on')
-    badgeTimer = window.setTimeout(() => {
-      badge.classList.remove('badge--on')
-      badge.classList.add('badge--off')
-    }, 1200)
     return
   }
 
-  badge.textContent = 'Lazy OFF'
+  badge.textContent = 'LASER OFF'
   badge.classList.add('badge--flash')
   badgeTimer = window.setTimeout(() => {
     badge.classList.remove('badge--flash')
