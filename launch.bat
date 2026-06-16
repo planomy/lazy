@@ -2,14 +2,21 @@
 cd /d "%~dp0"
 echo Starting Lazy Laser...
 start "" "Lazy Laser.exe"
-timeout /t 3 /nobreak >nul
-if exist "%USERPROFILE%\Desktop\lazy-started.txt" (
-  echo Lazy Laser started. Look for the small control window.
-) else (
-  echo.
-  echo Lazy Laser did not start. Windows may be blocking it.
-  echo Try: right-click Lazy Laser.exe -^> Properties -^> Unblock
-  echo Or allow it in Windows Security / antivirus.
-  echo.
-)
+timeout /t 4 /nobreak >nul
+if exist "lazy-started.txt" goto started
+if exist "%USERPROFILE%\Desktop\lazy-started.txt" goto started
+if exist "%USERPROFILE%\OneDrive\Desktop\lazy-started.txt" goto started
+tasklist /FI "IMAGENAME eq Lazy Laser.exe" 2>nul | find /I "Lazy Laser.exe" >nul && goto started
+echo.
+echo Lazy Laser did not start. Check Windows Security / antivirus.
+echo.
+goto end
+:started
+echo.
+echo Lazy Laser IS running.
+echo   - Press Alt+Tab and look for "Lazy Laser"
+echo   - Or click it on the taskbar
+echo   - Or press Ctrl+Alt+L to turn the laser on
+echo.
+:end
 pause

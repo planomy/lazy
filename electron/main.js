@@ -27,14 +27,18 @@ let pollTimer = null
 let overlayBounds = { x: 0, y: 0, width: 0, height: 0 }
 
 function markStarted() {
-  const marker = path.join(os.homedir(), 'Desktop', 'lazy-started.txt')
-  try {
-    fs.writeFileSync(
-      marker,
-      `Lazy Laser started at ${new Date().toLocaleString()}\nIf you see this but no control window, check antivirus.\n`,
-    )
-  } catch {
-    // ignore
+  const text = `Lazy Laser started at ${new Date().toLocaleString()}\nPress Ctrl+Alt+L or look for the Lazy Laser window.\n`
+  const paths = [
+    path.join(path.dirname(process.execPath), 'lazy-started.txt'),
+    path.join(os.homedir(), 'Desktop', 'lazy-started.txt'),
+    path.join(os.homedir(), 'OneDrive', 'Desktop', 'lazy-started.txt'),
+  ]
+  for (const marker of paths) {
+    try {
+      fs.writeFileSync(marker, text)
+    } catch {
+      // ignore
+    }
   }
 }
 
@@ -95,14 +99,13 @@ function unionDisplayBounds() {
 
 function createControlWindow() {
   controlWindow = new BrowserWindow({
-    width: 240,
-    height: 150,
-    x: 40,
-    y: 40,
+    width: 260,
+    height: 160,
     frame: true,
     resizable: false,
     alwaysOnTop: true,
     skipTaskbar: false,
+    show: false,
     title: 'Lazy Laser',
     backgroundColor: '#1e1e1e',
     webPreferences: {
@@ -113,11 +116,14 @@ function createControlWindow() {
   })
 
   controlWindow.setMenuBarVisibility(false)
+  controlWindow.center()
   controlWindow.loadFile(path.join(__dirname, '../src/control.html'))
   controlWindow.webContents.on('did-finish-load', () => {
     controlWindow.webContents.send('laser-state', laserActive)
     controlWindow.show()
     controlWindow.focus()
+    controlWindow.moveTop()
+    controlWindow.flashFrame(true)
   })
   controlWindow.on('closed', () => {
     controlWindow = null
