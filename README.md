@@ -38,7 +38,7 @@ Output: `release/Lazy Laser *.exe` — no installer, runs from the folder.
 
 | Action | Shortcut |
 |--------|----------|
-| Toggle laser on/off | **Ctrl+Shift+L** |
+| Toggle laser on/off | **Ctrl+Alt+L** |
 | Clear trail | **Ctrl+Shift+Backspace** |
 | Toggle laser | Click tray icon |
 | Quit | Tray menu → Quit Lazy |

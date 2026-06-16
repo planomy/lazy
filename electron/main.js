@@ -9,7 +9,7 @@ const {
 } = require('electron')
 const path = require('path')
 
-const TOGGLE_ACCEL = 'Control+Shift+L'
+const TOGGLE_ACCEL = 'Control+Alt+L'
 const CLEAR_ACCEL = 'Control+Shift+Backspace'
 const POLL_MS = 16
 
@@ -98,7 +98,7 @@ function setLaserActive(next) {
     overlayWindow.webContents.send('laser-toggle', laserActive)
   }
   if (tray) {
-    tray.setToolTip(laserActive ? 'Lazy Laser — ON (Ctrl+Shift+L)' : 'Lazy Laser — OFF (Ctrl+Shift+L)')
+    tray.setToolTip(laserActive ? 'Lazy Laser — ON (Ctrl+Alt+L)' : 'Lazy Laser — OFF (Ctrl+Alt+L)')
   }
 }
 
@@ -147,7 +147,7 @@ function createTray() {
   )
 
   tray = new Tray(icon.resize({ width: 16, height: 16 }))
-  tray.setToolTip('Lazy Laser — OFF (Ctrl+Shift+L)')
+  tray.setToolTip('Lazy Laser — OFF (Ctrl+Alt+L)')
 
   const menu = Menu.buildFromTemplate([
     {
