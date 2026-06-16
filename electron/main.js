@@ -7,11 +7,12 @@ const {
   screen,
   nativeImage,
   dialog,
+  ipcMain,
 } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const os = require('os')
 
-// Transparent overlays often crash silently on AMD/Intel GPUs without this.
 app.disableHardwareAcceleration()
 
 const TOGGLE_ACCEL = 'Control+Alt+L'
@@ -19,10 +20,23 @@ const CLEAR_ACCEL = 'Control+Shift+Backspace'
 const POLL_MS = 16
 
 let overlayWindow = null
+let controlWindow = null
 let tray = null
 let laserActive = false
 let pollTimer = null
 let overlayBounds = { x: 0, y: 0, width: 0, height: 0 }
+
+function markStarted() {
+  const marker = path.join(os.homedir(), 'Desktop', 'lazy-started.txt')
+  try {
+    fs.writeFileSync(
+      marker,
+      `Lazy Laser started at ${new Date().toLocaleString()}\nIf you see this but no control window, check antivirus.\n`,
+    )
+  } catch {
+    // ignore
+  }
+}
 
 function logError(label, err) {
   const line = `[${new Date().toISOString()}] ${label}: ${err?.stack || err}\n`
@@ -79,6 +93,37 @@ function unionDisplayBounds() {
   }
 }
 
+function createControlWindow() {
+  controlWindow = new BrowserWindow({
+    width: 240,
+    height: 150,
+    x: 40,
+    y: 40,
+    frame: true,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: false,
+    title: 'Lazy Laser',
+    backgroundColor: '#1e1e1e',
+    webPreferences: {
+      preload: path.join(__dirname, 'control-preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  })
+
+  controlWindow.setMenuBarVisibility(false)
+  controlWindow.loadFile(path.join(__dirname, '../src/control.html'))
+  controlWindow.webContents.on('did-finish-load', () => {
+    controlWindow.webContents.send('laser-state', laserActive)
+    controlWindow.show()
+    controlWindow.focus()
+  })
+  controlWindow.on('closed', () => {
+    controlWindow = null
+  })
+}
+
 function createOverlayWindow() {
   overlayBounds = unionDisplayBounds()
 
@@ -113,7 +158,7 @@ function createOverlayWindow() {
 
   overlayWindow.webContents.on('did-fail-load', (_event, code, desc) => {
     logError('overlay did-fail-load', `${code} ${desc}`)
-    dialog.showErrorBox('Lazy Laser', `Overlay failed to load (${desc}).`)
+    dialog.showErrorBox('Lazy Laser', `Laser overlay failed (${desc}). The control window still works — try again or restart.`)
   })
 
   overlayWindow.loadFile(path.join(__dirname, '../src/overlay.html'))
@@ -140,8 +185,11 @@ function setLaserActive(next) {
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.webContents.send('laser-toggle', laserActive)
   }
+  if (controlWindow && !controlWindow.isDestroyed()) {
+    controlWindow.webContents.send('laser-state', laserActive)
+  }
   if (tray) {
-    tray.setToolTip(laserActive ? 'Lazy Laser — ON (Ctrl+Alt+L)' : 'Lazy Laser — OFF (Ctrl+Alt+L)')
+    tray.setToolTip(laserActive ? 'Lazy Laser — ON' : 'Lazy Laser — OFF')
   }
 }
 
@@ -171,30 +219,28 @@ function toggleLaser() {
 
 function registerShortcuts() {
   globalShortcut.unregisterAll()
-  const toggleOk = globalShortcut.register(TOGGLE_ACCEL, toggleLaser)
-  const clearOk = globalShortcut.register(CLEAR_ACCEL, () => {
+  globalShortcut.register(TOGGLE_ACCEL, toggleLaser)
+  globalShortcut.register(CLEAR_ACCEL, () => {
     if (overlayWindow && !overlayWindow.isDestroyed()) {
       overlayWindow.webContents.send('laser-clear')
     }
   })
-  if (!toggleOk) {
-    dialog.showErrorBox('Lazy Laser', `Could not register ${TOGGLE_ACCEL}. Another app may be using it.`)
-  }
-  if (!clearOk) console.error(`Could not register ${CLEAR_ACCEL}`)
 }
 
-function showWelcome() {
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Lazy Laser',
-    message: 'Lazy Laser is running',
-    detail:
-      'Press Ctrl+Alt+L to turn the laser on or off.\n\n' +
-      'Look for the red dot in the system tray near the clock. ' +
-      'If you do not see it, click the ^ arrow to show hidden icons.',
-    buttons: ['OK'],
-    noLink: true,
-  })
+function createTray() {
+  const icon = createTrayIcon().resize({ width: 16, height: 16 })
+  tray = new Tray(icon)
+  tray.setToolTip('Lazy Laser — OFF')
+
+  const menu = Menu.buildFromTemplate([
+    { label: 'Show control window', click: () => controlWindow?.show() },
+    { label: 'Toggle laser', click: toggleLaser },
+    { type: 'separator' },
+    { label: 'Quit', click: () => app.quit() },
+  ])
+
+  tray.setContextMenu(menu)
+  tray.on('click', () => controlWindow?.show())
 }
 
 function showAlreadyRunning() {
@@ -202,42 +248,13 @@ function showAlreadyRunning() {
     type: 'info',
     title: 'Lazy Laser',
     message: 'Lazy Laser is already running',
-    detail: 'Press Ctrl+Alt+L or click the red tray icon.',
+    detail: 'Look for the Lazy Laser control window.',
     buttons: ['OK'],
-    noLink: true,
   })
 }
 
-function createTray() {
-  const icon = createTrayIcon().resize({ width: 16, height: 16 })
-  tray = new Tray(icon)
-  tray.setToolTip('Lazy Laser — OFF (Ctrl+Alt+L)')
-
-  const menu = Menu.buildFromTemplate([
-    {
-      label: 'Toggle laser',
-      accelerator: TOGGLE_ACCEL,
-      click: toggleLaser,
-    },
-    {
-      label: 'Clear trail',
-      accelerator: CLEAR_ACCEL,
-      click: () => {
-        if (overlayWindow && !overlayWindow.isDestroyed()) {
-          overlayWindow.webContents.send('laser-clear')
-        }
-      },
-    },
-    { type: 'separator' },
-    {
-      label: 'Quit Lazy',
-      click: () => app.quit(),
-    },
-  ])
-
-  tray.setContextMenu(menu)
-  tray.on('click', toggleLaser)
-}
+ipcMain.on('control-toggle', toggleLaser)
+ipcMain.on('control-quit', () => app.quit())
 
 const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
@@ -246,15 +263,17 @@ if (!gotLock) {
   app.on('second-instance', showAlreadyRunning)
 
   app.whenReady().then(() => {
+    markStarted()
+
     try {
+      createControlWindow()
       createTray()
-      showWelcome()
 
       try {
         createOverlayWindow()
       } catch (err) {
         logError('createOverlayWindow', err)
-        dialog.showErrorBox('Lazy Laser', `Could not start overlay:\n${err.message}`)
+        dialog.showErrorBox('Lazy Laser', `Overlay failed:\n${err.message}\n\nYou can still use the control window to retry after restart.`)
       }
 
       registerShortcuts()
@@ -274,10 +293,6 @@ if (!gotLock) {
 process.on('uncaughtException', (err) => {
   logError('uncaughtException', err)
   dialog.showErrorBox('Lazy Laser crashed', err.message)
-})
-
-process.on('unhandledRejection', (reason) => {
-  logError('unhandledRejection', reason)
 })
 
 app.on('will-quit', () => {
