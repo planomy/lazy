@@ -59,6 +59,12 @@ function logError(label, err) {
 }
 
 function createTrayIcon() {
+  const iconPath = path.join(__dirname, '../assets/icon.png')
+  const fromFile = nativeImage.createFromPath(iconPath)
+  if (!fromFile.isEmpty()) {
+    return fromFile
+  }
+
   const size = 32
   const buffer = Buffer.alloc(size * size * 4)
   const cx = 16

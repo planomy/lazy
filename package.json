@@ -1,6 +1,6 @@
 {
   "name": "lazy",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "System-wide fading laser pointer for Windows presentations",
   "author": "planomy",
   "main": "electron/main.js",
@@ -16,10 +16,12 @@
       "output": "release"
     },
     "extraFiles": [
-      "launch.bat"
+      "launch.bat",
+      "create-shortcut.bat"
     ],
     "win": {
-      "target": ["zip"]
+      "target": ["zip"],
+      "icon": "assets/icon.png"
     },
     "files": [
       "electron/**/*",
