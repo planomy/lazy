@@ -37,4 +37,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Lazy-Laser-Windows
-          path: release/*.exe
+          path: |
+            release/*.exe
+            release/*.zip
